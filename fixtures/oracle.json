@@ -1,0 +1,70 @@
+{
+  "generator": "Blender 5.2.1 LTS",
+  "cases": {
+    "plain-pied-2-pans": {
+      "mursBruts": 95.0,
+      "mursMitoyens": 0.0,
+      "ouvertures": 13.275,
+      "fenetres": 11.34,
+      "nbFenetres": 7,
+      "pignons": 22.406643,
+      "rampants": 107.428162,
+      "plancherCombles": 88.0,
+      "toitureTerrasse": 0.0,
+      "plancherBas": 88.0,
+      "mursNets": 81.725
+    },
+    "etage-4-pans": {
+      "mursBruts": 239.199989,
+      "mursMitoyens": 0.0,
+      "ouvertures": 34.334999,
+      "fenetres": 32.399998,
+      "nbFenetres": 20,
+      "pignons": 0.0,
+      "rampants": 142.703827,
+      "plancherCombles": 126.0,
+      "toitureTerrasse": 0.0,
+      "plancherBas": 126.0,
+      "mursNets": 204.86499
+    },
+    "carre-4-pans": {
+      "mursBruts": 90.0,
+      "mursMitoyens": 0.0,
+      "ouvertures": 10.035,
+      "fenetres": 8.1,
+      "nbFenetres": 5,
+      "pignons": 0.0,
+      "rampants": 105.737991,
+      "plancherCombles": 81.0,
+      "toitureTerrasse": 0.0,
+      "plancherBas": 81.0,
+      "mursNets": 79.965
+    },
+    "maison-de-ville-mitoyenne": {
+      "mursBruts": 210.600014,
+      "mursMitoyens": 97.200005,
+      "ouvertures": 21.375,
+      "fenetres": 19.439999,
+      "nbFenetres": 12,
+      "pignons": 0.0,
+      "rampants": 59.396969,
+      "plancherCombles": 42.0,
+      "toitureTerrasse": 0.0,
+      "plancherBas": 42.0,
+      "mursNets": 92.02501
+    },
+    "toit-terrasse": {
+      "mursBruts": 220.0,
+      "mursMitoyens": 50.0,
+      "ouvertures": 31.094997,
+      "fenetres": 29.159997,
+      "nbFenetres": 18,
+      "pignons": 0.0,
+      "rampants": 0.0,
+      "plancherCombles": 0.0,
+      "toitureTerrasse": 120.0,
+      "plancherBas": 120.0,
+      "mursNets": 138.905003
+    }
+  }
+}

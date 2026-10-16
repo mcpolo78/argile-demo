@@ -1,0 +1,27 @@
+{
+  "plain-pied-2-pans": {
+    "longueur": 11, "largeur": 8, "niveaux": 1, "hauteurSousPlafond": 2.5,
+    "toiture": "deux-pans", "pente": 35, "combles": "perdus", "plancherBas": "vide-sanitaire",
+    "mitoyens": 0, "fenetresParNiveau": { "nord": 2, "sud": 3, "est": 1, "ouest": 1 }
+  },
+  "etage-4-pans": {
+    "longueur": 14, "largeur": 9, "niveaux": 2, "hauteurSousPlafond": 2.6,
+    "toiture": "quatre-pans", "pente": 28, "combles": "perdus", "plancherBas": "sous-sol",
+    "mitoyens": 0, "fenetresParNiveau": { "nord": 3, "sud": 4, "est": 2, "ouest": 1 }
+  },
+  "carre-4-pans": {
+    "longueur": 9, "largeur": 9, "niveaux": 1, "hauteurSousPlafond": 2.5,
+    "toiture": "quatre-pans", "pente": 40, "combles": "perdus", "plancherBas": "terre-plein",
+    "mitoyens": 0, "fenetresParNiveau": { "nord": 1, "sud": 2, "est": 1, "ouest": 1 }
+  },
+  "maison-de-ville-mitoyenne": {
+    "longueur": 7, "largeur": 6, "niveaux": 3, "hauteurSousPlafond": 2.7,
+    "toiture": "deux-pans", "pente": 45, "combles": "amenages", "plancherBas": "terre-plein",
+    "mitoyens": 2, "fenetresParNiveau": { "nord": 2, "sud": 2, "est": 0, "ouest": 0 }
+  },
+  "toit-terrasse": {
+    "longueur": 12, "largeur": 10, "niveaux": 2, "hauteurSousPlafond": 2.5,
+    "toiture": "plate", "pente": 30, "combles": "perdus", "plancherBas": "vide-sanitaire",
+    "mitoyens": 1, "fenetresParNiveau": { "nord": 3, "sud": 4, "est": 0, "ouest": 2 }
+  }
+}

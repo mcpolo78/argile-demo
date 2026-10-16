@@ -1,0 +1,143 @@
+{
+  "id": "57b48886-a26e-4ca9-aa01-7bc454376ad4",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.bareme": {
+      "name": "bareme",
+      "schema": "",
+      "columns": {
+        "work_id": {
+          "name": "work_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "unite": {
+          "name": "unite",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prix_unitaire": {
+          "name": "prix_unitaire",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cee": {
+          "name": "cee",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mpr_tres_modeste": {
+          "name": "mpr_tres_modeste",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mpr_modeste": {
+          "name": "mpr_modeste",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mpr_intermediaire": {
+          "name": "mpr_intermediaire",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mpr_superieur": {
+          "name": "mpr_superieur",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "plafond_unites": {
+          "name": "plafond_unites",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.projects": {
+      "name": "projects",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "params": {
+          "name": "params",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "works": {
+          "name": "works",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tranche": {
+          "name": "tranche",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "surfaces": {
+          "name": "surfaces",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "estimation": {
+          "name": "estimation",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
