@@ -12,14 +12,11 @@ export default async function Home() {
 
   return (
     <main className="mx-auto max-w-[1600px] px-4 py-4">
-      <header className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-        <div>
-          <h1 className="text-xl font-semibold">Maquette 3D paramétrique</h1>
-          <p className="text-sm text-muted">
-            Décrivez la maison, cliquez les zones à rénover : surfaces et estimation des aides se mettent à jour.
-          </p>
-        </div>
-        <span className="text-xs text-muted">Démo réalisée pour une candidature chez Argile</span>
+      <header className="mb-4">
+        <h1 className="text-xl font-semibold">Maquette 3D paramétrique</h1>
+        <p className="text-sm text-muted">
+          Décrivez la maison, cliquez les zones à rénover : surfaces et estimation des aides se mettent à jour.
+        </p>
       </header>
 
       <Configurator bareme={bareme} />
