@@ -1,6 +1,8 @@
 # argile-demo — maquette 3D paramétrique
 
 Projet de démonstration pour une candidature chez **Argile** (SaaS pour les artisans RGE de la rénovation énergétique).
+**Démo en ligne : https://argile-demo.vercel.app** · version intégrable : https://argile-demo.vercel.app/embed
+
 Poste : [développeur full-stack](https://www.welcometothejungle.com/fr/companies/remi/jobs/eb8dcc21-ed78-4502-8cf0-3ea0d488e583), CDI, Paris.
 
 Argile intègre une reconstruction 3D du logement et un simulateur d'aides intégrable au site des artisans. Cette démo relie les deux. On décrit une maison en quelques paramètres et on la voit en 3D. Un clic sur les zones à rénover suffit : **le métré et l'estimation des aides se recalculent à partir de la géométrie**.
@@ -128,4 +130,4 @@ Les fichiers bruts restent dans `assets/tripo/`, ignoré par git. Si le modèle 
 - [x] Projets enregistrés, page partageable, version `/embed`
 - [x] Modèle de PAC Tripo3D, optimisé pour le web
 - [x] Captures d'écran et animation (`npm run capture`)
-- [ ] Déploiement Vercel + Neon
+- [x] Déploiement Vercel + Neon
