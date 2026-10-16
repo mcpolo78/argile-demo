@@ -261,17 +261,36 @@ export function buildHouse(p: HouseParams): House {
 }
 
 /**
- * Emplacement de l'unité extérieure de PAC : contre la première façade
- * non mitoyenne parmi nord, ouest, est, sud, à 1,2 m de l'angle droit.
+ * Emplacement de l'unité extérieure de PAC : sur un pignon plutôt que sur la façade
+ * d'entrée (sud), donc la première façade non mitoyenne parmi est, ouest, nord, sud,
+ * à 1,2 m de l'angle droit vu de l'extérieur.
  */
-export function emplacementPac(p: HouseParams): { position: Vec3; rotationY: number } {
+export function emplacementPac(p: HouseParams): { facade: Facade; position: Vec3; rotationY: number } {
   const mitoyennes = facadesMitoyennes(p.mitoyens);
-  const f = (["nord", "ouest", "est", "sud"] as const).find((x) => !mitoyennes.includes(x)) ?? "nord";
+  const f = (["est", "ouest", "nord", "sud"] as const).find((x) => !mitoyennes.includes(x)) ?? "nord";
   const frame = facadeFrame(f, p.longueur / 2, p.largeur / 2);
   const n = normalOf(frame);
   const base = toWorld(frame, [longueurFacade(p, f) - 1.2, 0]);
   return {
+    facade: f,
     position: [base[0] + 0.5 * n[0], 0, base[2] + 0.5 * n[2]],
     rotationY: Math.atan2(n[0], n[2]),
   };
+}
+
+/**
+ * Direction de caméra (non normalisée, depuis le centre de la maison) qui montre
+ * une façade de trois quarts, avec un peu de la façade voisine pour garder le contexte.
+ */
+export function directionVue(f: Facade): Vec3 {
+  switch (f) {
+    case "est":
+      return [0.85, 0.45, 0.55];
+    case "ouest":
+      return [-0.85, 0.45, 0.55];
+    case "nord":
+      return [0.55, 0.45, -0.85];
+    case "sud":
+      return [0.55, 0.42, 0.72];
+  }
 }

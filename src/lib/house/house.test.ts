@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildHouse, emplacementPac, normalOf, toWorld, type Vec3 } from "./geometry";
+import { buildHouse, directionVue, emplacementPac, normalOf, toWorld, type Vec3 } from "./geometry";
 import { DEFAULT_PARAMS, OUVERTURES, houseParamsSchema, type HouseParams } from "./params";
 import { computeSurfaces, polygonArea } from "./surfaces";
 
@@ -155,14 +155,28 @@ describe("validation des paramètres", () => {
 });
 
 describe("emplacement de la PAC", () => {
-  it("se place devant la façade nord, hors de l'emprise", () => {
+  it("se place devant le pignon est, hors de l'emprise", () => {
     const p = P({});
-    const { position } = emplacementPac(p);
-    expect(position[2]).toBeLessThan(-p.largeur / 2);
+    const { facade, position } = emplacementPac(p);
+    expect(facade).toBe("est");
+    expect(position[0]).toBeGreaterThan(p.longueur / 2);
   });
-  it("évite les façades mitoyennes", () => {
-    const p = P({ mitoyens: 2, fenetresParNiveau: { nord: 2, sud: 3, est: 0, ouest: 0 } });
-    const { position } = emplacementPac(p);
-    expect(Math.abs(position[0])).toBeLessThan(p.longueur / 2);
+  it("évite les façades mitoyennes, sans jamais prendre la façade d'entrée si possible", () => {
+    const un = P({ mitoyens: 1, fenetresParNiveau: { nord: 2, sud: 3, est: 0, ouest: 1 } });
+    expect(emplacementPac(un).facade).toBe("ouest");
+    const deux = P({ mitoyens: 2, fenetresParNiveau: { nord: 2, sud: 3, est: 0, ouest: 0 } });
+    const { facade, position } = emplacementPac(deux);
+    expect(facade).toBe("nord");
+    expect(Math.abs(position[0])).toBeLessThan(deux.longueur / 2);
+  });
+  it("la vue choisie regarde la façade de la PAC", () => {
+    for (const mitoyens of [0, 1, 2]) {
+      const fen = { nord: 2, sud: 3, est: mitoyens >= 1 ? 0 : 1, ouest: mitoyens >= 2 ? 0 : 1 };
+      const p = P({ mitoyens, fenetresParNiveau: fen });
+      const { position } = emplacementPac(p);
+      const d = directionVue(emplacementPac(p).facade);
+      // La PAC est du côté de la caméra : produit scalaire horizontal positif.
+      expect(position[0] * d[0] + position[2] * d[2]).toBeGreaterThan(0);
+    }
   });
 });

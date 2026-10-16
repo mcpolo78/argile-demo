@@ -23,6 +23,8 @@ Argile intègre une reconstruction 3D du logement et un simulateur d'aides inté
 - **Métré** : murs bruts, nets et mitoyens, ouvertures, pignons, rampants, plancher des combles, toiture-terrasse, plancher bas.
 - **Estimation indicative** : coût, MaPrimeRénov' par tranche de revenus, primes CEE, plafonds par poste, écrêtement et reste à charge.
 - **Projets enregistrés** en Postgres, avec une URL partageable `/projets/[id]`. Le serveur revalide l'entrée et **recalcule** surfaces et estimation : on ne fait pas confiance au client.
+- **Export de l'estimation** : le bouton « Télécharger mon estimation » enregistre le projet et télécharge un **PDF d'une page** (vue 3D, logement, postes, aides, reste à charge, lien du projet), généré dans le navigateur avec jsPDF. Trois autres formats sont proposés ensuite : image PNG de la vue 3D, **JSON structuré** (format versionné `argile-demo/estimation@1`, prêt à importer dans un CRM) et lien du projet.
+- **PAC mise en scène** : cochée par défaut et posée sur un pignon. Quand on la recoche après avoir tourné la vue, la caméra pivote jusqu'à elle.
 - **Version intégrable** sur `/embed` (en-tête `frame-ancestors *`), avec le snippet iframe affiché sur la page d'accueil.
 
 ## Architecture

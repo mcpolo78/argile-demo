@@ -20,6 +20,7 @@
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
     "drizzle-orm": "^0.45.4",
+    "jspdf": "^4.2.1",
     "next": "15.5.28",
     "react": "19.1.0",
     "react-dom": "19.1.0",

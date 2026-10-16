@@ -1,12 +1,12 @@
 "use client";
 
 import { Edges, OrbitControls, useGLTF } from "@react-three/drei";
-import { Canvas, useThree, type ThreeEvent } from "@react-three/fiber";
-import { Component, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
+import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
+import { Component, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import * as THREE from "three";
 import { MODELS, PAC_DIMENSIONS } from "@/lib/assets";
 import { WORK_COLORS, WORK_LABELS, workForZone, type WorkId } from "@/lib/estimate/works";
-import { emplacementPac, normalOf, type House, type Zone, type ZoneKind } from "@/lib/house/geometry";
+import { directionVue, emplacementPac, normalOf, type House, type Zone, type ZoneKind } from "@/lib/house/geometry";
 import type { Surfaces } from "@/lib/house/surfaces";
 import { formatM2 } from "@/lib/format";
 
@@ -41,6 +41,8 @@ interface Props {
   surfaces: Surfaces;
   works: ReadonlySet<WorkId>;
   onToggleWork?: (w: WorkId) => void;
+  /** Rempli par la scène : renvoie une capture PNG (data URL) de la vue courante. */
+  snapshotRef?: { current: (() => string) | null };
 }
 
 export default function HouseScene(props: Props) {
@@ -64,7 +66,8 @@ export default function HouseScene(props: Props) {
           shadow-camera-top={20}
           shadow-camera-bottom={-20}
         />
-        <CameraRig house={props.house} />
+        <CameraRig house={props.house} pacOn={props.works.has("pac-air-eau")} />
+        {props.snapshotRef && <Snapshot target={props.snapshotRef} />}
         <SceneContent {...props} hoverId={hoverId} setHoverId={setHoverId} />
         <OrbitControls
           makeDefault
@@ -96,26 +99,102 @@ export default function HouseScene(props: Props) {
 }
 
 /**
- * Cadre la maison entière quel que soit le format du canvas (portrait sur mobile).
- * Recalculé au montage et au redimensionnement, pas quand les paramètres changent :
- * l'utilisateur garde le point de vue qu'il a choisi.
+ * Capture à la demande : on rend une image puis on lit le canvas dans la même tâche,
+ * avant que le navigateur ne vide le tampon (pas besoin de preserveDrawingBuffer).
  */
-function CameraRig({ house }: { house: House }) {
+function Snapshot({ target }: { target: { current: (() => string) | null } }) {
+  const gl = useThree((s) => s.gl);
+  const scene = useThree((s) => s.scene);
+  const camera = useThree((s) => s.camera);
+  useEffect(() => {
+    target.current = () => {
+      gl.render(scene, camera);
+      return gl.domElement.toDataURL("image/png");
+    };
+    return () => {
+      target.current = null;
+    };
+  }, [gl, scene, camera, target]);
+  return null;
+}
+
+interface ControlsLike {
+  target: THREE.Vector3;
+  update(): void;
+  addEventListener(type: "start", fn: () => void): void;
+  removeEventListener(type: "start", fn: () => void): void;
+}
+
+const vec = (v: readonly [number, number, number]) => new THREE.Vector3(v[0], v[1], v[2]);
+const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+
+/**
+ * Cadre la maison entière quel que soit le format du canvas (portrait sur mobile),
+ * du côté de la PAC si elle est sélectionnée. Recalculé au montage et au
+ * redimensionnement, pas quand les paramètres changent : l'utilisateur garde son point de vue.
+ * Exception : cocher la PAC fait pivoter la caméra jusqu'à la façade qui la porte.
+ */
+function CameraRig({ house, pacOn }: { house: House; pacOn: boolean }) {
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
   const size = useThree((s) => s.size);
-  const [initial] = useState(house);
+  const controls = useThree((s) => s.controls) as unknown as ControlsLike | null;
+  const [initial] = useState(() => ({ house, pacOn }));
+  const pacFacade = emplacementPac(house.params).facade;
+
   useEffect(() => {
-    const { longueur, largeur } = initial.params;
-    const rayon = 0.5 * Math.hypot(longueur, largeur, initial.hauteurMurs + initial.hauteurToit + SOCLE) + 1.5;
+    const { longueur, largeur } = initial.house.params;
+    const rayon = 0.5 * Math.hypot(longueur, largeur, initial.house.hauteurMurs + initial.house.hauteurToit + SOCLE) + 1.5;
     const vfov = THREE.MathUtils.degToRad(camera.fov);
     const hfov = 2 * Math.atan(Math.tan(vfov / 2) * (size.width / size.height));
     const distance = rayon / Math.sin(Math.min(vfov, hfov) / 2);
-    const dir = new THREE.Vector3(0.55, 0.42, 0.72).normalize();
-    const target = new THREE.Vector3(0, SOCLE + initial.hauteurMurs / 2, 0);
+    const facade = initial.pacOn ? emplacementPac(initial.house.params).facade : "sud";
+    const dir = vec(directionVue(facade)).normalize();
+    const target = new THREE.Vector3(0, SOCLE + initial.house.hauteurMurs / 2, 0);
     camera.position.copy(target).addScaledVector(dir, distance);
     camera.lookAt(target);
     camera.updateProjectionMatrix();
   }, [camera, size.width, size.height, initial]);
+
+  // Pivot animé vers la PAC quand elle passe de décochée à cochée.
+  const anim = useRef<{ from: THREE.Spherical; to: THREE.Spherical; t: number } | null>(null);
+  const prev = useRef(pacOn);
+  useEffect(() => {
+    if (pacOn && !prev.current && controls) {
+      const from = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+      const to = new THREE.Spherical().setFromVector3(vec(directionVue(pacFacade)).normalize());
+      to.radius = from.radius;
+      // Plus court chemin autour de la maison.
+      let dTheta = to.theta - from.theta;
+      dTheta = Math.atan2(Math.sin(dTheta), Math.cos(dTheta));
+      to.theta = from.theta + dTheta;
+      anim.current = { from, to, t: 0 };
+    }
+    prev.current = pacOn;
+  }, [pacOn, pacFacade, camera, controls]);
+
+  // Si l'utilisateur reprend la main pendant le pivot, on le laisse faire.
+  useEffect(() => {
+    if (!controls) return;
+    const stop = () => (anim.current = null);
+    controls.addEventListener("start", stop);
+    return () => controls.removeEventListener("start", stop);
+  }, [controls]);
+
+  useFrame((_, dt) => {
+    const a = anim.current;
+    if (!a || !controls) return;
+    a.t = Math.min(1, a.t + dt / 0.9);
+    const k = easeInOut(a.t);
+    const s = new THREE.Spherical(
+      a.from.radius,
+      THREE.MathUtils.lerp(a.from.phi, a.to.phi, k),
+      THREE.MathUtils.lerp(a.from.theta, a.to.theta, k),
+    );
+    camera.position.copy(controls.target).add(new THREE.Vector3().setFromSpherical(s));
+    camera.lookAt(controls.target);
+    controls.update();
+    if (a.t >= 1) anim.current = null;
+  });
   return null;
 }
 
