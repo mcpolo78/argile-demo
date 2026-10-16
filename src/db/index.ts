@@ -14,11 +14,13 @@ export type Db = PgDatabase<PgQueryResultHKT, typeof schema>;
 const globalForDb = globalThis as unknown as { dbPromise?: Promise<Db> };
 
 /**
- * Neon si DATABASE_URL est défini (prod), sinon PGlite embarqué dans `.pglite/`,
+ * Neon sur Vercel (ou avec USE_NEON=1), sinon PGlite embarqué dans `.pglite/`,
  * migré et seedé au premier appel : aucun Postgres à installer en local.
+ * `vercel env pull` écrit DATABASE_URL dans .env.local : sans cette garde,
+ * le dev local écrirait ses projets de test dans la base de production.
  */
 async function connect(): Promise<Db> {
-  if (process.env.DATABASE_URL) {
+  if (process.env.DATABASE_URL && (process.env.VERCEL || process.env.USE_NEON === "1")) {
     return drizzleNeon(neon(process.env.DATABASE_URL), { schema }) as unknown as Db;
   }
   const db = drizzlePglite(new PGlite(".pglite"), { schema });

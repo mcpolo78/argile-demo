@@ -8,10 +8,17 @@ import { migrate } from "drizzle-orm/neon-http/migrator";
 import * as schema from "./schema";
 import { seedBareme } from "./seed";
 
-const url = process.env.DATABASE_URL;
-if (!url) throw new Error("DATABASE_URL manquant");
+// Pas d'await de premier niveau : tsx compile ce fichier en CommonJS.
+async function main() {
+  const url = process.env.DATABASE_URL;
+  if (!url) throw new Error("DATABASE_URL manquant");
+  const db = drizzle(neon(url), { schema });
+  await migrate(db, { migrationsFolder: "drizzle" });
+  await seedBareme(db);
+  console.log("Base migrée et barème seedé.");
+}
 
-const db = drizzle(neon(url), { schema });
-await migrate(db, { migrationsFolder: "drizzle" });
-await seedBareme(db);
-console.log("Base migrée et barème seedé.");
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
