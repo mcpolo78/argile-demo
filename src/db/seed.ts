@@ -1,5 +1,7 @@
+import { notInArray } from "drizzle-orm";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { DEFAULT_BAREME, type BaremeLigne } from "@/lib/estimate/bareme";
+import { WORK_IDS } from "@/lib/estimate/works";
 import { bareme } from "./schema";
 
 type AnyPgDb = PgDatabase<PgQueryResultHKT, Record<string, unknown>>;
@@ -34,7 +36,11 @@ export function fromRow(r: typeof bareme.$inferSelect): BaremeLigne {
   };
 }
 
-/** Insère le barème de démonstration sans écraser une ligne déjà modifiée. */
+/**
+ * Insère le barème de démonstration sans écraser une ligne déjà modifiée,
+ * et retire les postes qui n'existent plus dans le code (ex. le chauffe-eau).
+ */
 export async function seedBareme(db: AnyPgDb) {
+  await db.delete(bareme).where(notInArray(bareme.workId, [...WORK_IDS]));
   await db.insert(bareme).values(DEFAULT_BAREME.map(toRow)).onConflictDoNothing();
 }

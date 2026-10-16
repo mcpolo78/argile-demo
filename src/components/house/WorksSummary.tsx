@@ -26,7 +26,7 @@ export default function WorksSummary({ params, surfaces, works, tranche, estimat
         <ul className="space-y-1">
           {availableWorks(params).map((w) => {
             const q = workQuantity(w, surfaces, params);
-            const unite = w === "menuiseries" ? `${q} fenêtre${q > 1 ? "s" : ""}` : w.startsWith("pac") || w.startsWith("ballon") ? "" : formatM2(q);
+            const unite = w === "menuiseries" ? `${q} fenêtre${q > 1 ? "s" : ""}` : w === "pac-air-eau" ? "" : formatM2(q);
             return (
               <li key={w}>
                 <label className="flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 text-sm hover:bg-border/40">

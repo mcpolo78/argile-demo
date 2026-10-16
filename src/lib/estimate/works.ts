@@ -10,7 +10,6 @@ export const WORK_IDS = [
   "isolation-plancher-bas",
   "menuiseries",
   "pac-air-eau",
-  "ballon-thermo",
 ] as const;
 export type WorkId = (typeof WORK_IDS)[number];
 
@@ -22,7 +21,6 @@ export const WORK_LABELS: Record<WorkId, string> = {
   "isolation-plancher-bas": "Isolation du plancher bas",
   menuiseries: "Remplacement des fenêtres",
   "pac-air-eau": "Pompe à chaleur air-eau",
-  "ballon-thermo": "Chauffe-eau thermodynamique",
 };
 
 /** Couleur de surbrillance de chaque poste dans la vue 3D. */
@@ -33,8 +31,8 @@ export const WORK_COLORS: Record<WorkId, string> = {
   ite: "#3b82c4",
   "isolation-plancher-bas": "#8b6bd1",
   menuiseries: "#2fa58f",
-  "pac-air-eau": "#d9534f",
-  "ballon-thermo": "#d9534f",
+  // Gris de l'unité extérieure : c'est un équipement, pas une zone à colorer.
+  "pac-air-eau": "#9aa0a6",
 };
 
 /** Poste de travaux associé à une zone cliquée, ou null si la zone n'en porte pas. */
@@ -114,7 +112,6 @@ export function workQuantity(w: WorkId, s: Surfaces, p: HouseParams): number {
     case "menuiseries":
       return s.nbFenetres;
     case "pac-air-eau":
-    case "ballon-thermo":
       return 1;
   }
 }

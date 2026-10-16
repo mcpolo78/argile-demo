@@ -67,7 +67,7 @@ export default function HouseScene(props: Props) {
           shadow-camera-bottom={-20}
         />
         <CameraRig house={props.house} pacOn={props.works.has("pac-air-eau")} />
-        {props.snapshotRef && <Snapshot target={props.snapshotRef} />}
+        {props.snapshotRef && <Snapshot target={props.snapshotRef} house={props.house} />}
         <SceneContent {...props} hoverId={hoverId} setHoverId={setHoverId} />
         <OrbitControls
           makeDefault
@@ -79,7 +79,12 @@ export default function HouseScene(props: Props) {
       </Canvas>
       {/* Carte fixe plutôt qu'une infobulle qui suit la souris : jamais coupée par le bord du canvas. */}
       <div className="pointer-events-none absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] rounded-md bg-foreground/90 px-3 py-2 text-xs text-white shadow-lg">
-        {hovered ? (
+        {hoverId === PAC_HOVER_ID ? (
+          <>
+            <div className="font-medium">Pompe à chaleur air-eau · unité extérieure</div>
+            <div className="opacity-80">Clic pour retirer : {WORK_LABELS["pac-air-eau"].toLowerCase()}</div>
+          </>
+        ) : hovered ? (
           <>
             <div className="font-medium">
               {hovered.label} · {formatM2(props.surfaces.parZone[hovered.id])}
@@ -98,23 +103,59 @@ export default function HouseScene(props: Props) {
   );
 }
 
+/** Distance de caméra qui fait tenir toute la maison dans le cadre, pour un format donné. */
+function fitDistance(house: House, fovDeg: number, aspect: number) {
+  const { longueur, largeur } = house.params;
+  const rayon = 0.5 * Math.hypot(longueur, largeur, house.hauteurMurs + house.hauteurToit + SOCLE) + 1.5;
+  const vfov = THREE.MathUtils.degToRad(fovDeg);
+  const hfov = 2 * Math.atan(Math.tan(vfov / 2) * aspect);
+  return rayon / Math.sin(Math.min(vfov, hfov) / 2);
+}
+
+/** Format des captures (PDF, PNG) : paysage, quel que soit le format du canvas à l'écran. */
+const CAPTURE = { width: 1600, height: 1000 };
+
 /**
- * Capture à la demande : on rend une image puis on lit le canvas dans la même tâche,
- * avant que le navigateur ne vide le tampon (pas besoin de preserveDrawingBuffer).
+ * Capture à la demande, au format CAPTURE et depuis le point de vue courant.
+ * On redimensionne le rendu le temps d'une image, on lit le canvas dans la même tâche
+ * (avant que le navigateur ne vide le tampon, donc sans preserveDrawingBuffer), puis on restaure.
  */
-function Snapshot({ target }: { target: { current: (() => string) | null } }) {
+function Snapshot({ target, house }: { target: { current: (() => string) | null }; house: House }) {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
-  const camera = useThree((s) => s.camera);
+  const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
+  const controls = useThree((s) => s.controls) as unknown as ControlsLike | null;
   useEffect(() => {
     target.current = () => {
+      const size = gl.getSize(new THREE.Vector2());
+      const ratio = gl.getPixelRatio();
+      const aspect = camera.aspect;
+      const position = camera.position.clone();
+      // Même angle de vue que l'utilisateur, recadré pour que la maison remplisse l'image.
+      const cible = controls?.target ?? new THREE.Vector3(0, SOCLE + house.hauteurMurs / 2, 0);
+      const dir = position.clone().sub(cible).normalize();
+      const distance = fitDistance(house, camera.fov, CAPTURE.width / CAPTURE.height) * 0.9;
+      gl.setPixelRatio(1);
+      gl.setSize(CAPTURE.width, CAPTURE.height, false);
+      camera.aspect = CAPTURE.width / CAPTURE.height;
+      camera.position.copy(cible).addScaledVector(dir, distance);
+      camera.lookAt(cible);
+      camera.updateProjectionMatrix();
       gl.render(scene, camera);
-      return gl.domElement.toDataURL("image/png");
+      const url = gl.domElement.toDataURL("image/png");
+      gl.setPixelRatio(ratio);
+      gl.setSize(size.x, size.y, false);
+      camera.aspect = aspect;
+      camera.position.copy(position);
+      camera.lookAt(cible);
+      camera.updateProjectionMatrix();
+      gl.render(scene, camera);
+      return url;
     };
     return () => {
       target.current = null;
     };
-  }, [gl, scene, camera, target]);
+  }, [gl, scene, camera, controls, target, house]);
   return null;
 }
 
@@ -142,11 +183,7 @@ function CameraRig({ house, pacOn }: { house: House; pacOn: boolean }) {
   const pacFacade = emplacementPac(house.params).facade;
 
   useEffect(() => {
-    const { longueur, largeur } = initial.house.params;
-    const rayon = 0.5 * Math.hypot(longueur, largeur, initial.house.hauteurMurs + initial.house.hauteurToit + SOCLE) + 1.5;
-    const vfov = THREE.MathUtils.degToRad(camera.fov);
-    const hfov = 2 * Math.atan(Math.tan(vfov / 2) * (size.width / size.height));
-    const distance = rayon / Math.sin(Math.min(vfov, hfov) / 2);
+    const distance = fitDistance(initial.house, camera.fov, size.width / size.height);
     const facade = initial.pacOn ? emplacementPac(initial.house.params).facade : "sud";
     const dir = vec(directionVue(facade)).normalize();
     const target = new THREE.Vector3(0, SOCLE + initial.house.hauteurMurs / 2, 0);
@@ -264,8 +301,25 @@ function SceneContent({
       </group>
 
       {works.has("pac-air-eau") && (
-        <group position={[pac.position[0], pac.position[1], pac.position[2]]} rotation-y={pac.rotationY}>
+        <group
+          position={[pac.position[0], pac.position[1], pac.position[2]]}
+          rotation-y={pac.rotationY}
+          onPointerMove={(e) => {
+            e.stopPropagation();
+            if (hoverId !== PAC_HOVER_ID) setHoverId(PAC_HOVER_ID);
+          }}
+          onPointerOut={() => {
+            if (hoverId === PAC_HOVER_ID) setHoverId(null);
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            // La PAC disparaît au clic : pointerout ne viendra pas, on efface le survol nous-mêmes.
+            setHoverId(null);
+            onToggleWork?.("pac-air-eau");
+          }}
+        >
           <Pac />
+          {hoverId === PAC_HOVER_ID && <PacHighlight />}
         </group>
       )}
 
@@ -310,6 +364,21 @@ function ZoneMesh({
         polygonOffsetFactor={1}
       />
       <Edges color={verre ? "#5d7f8e" : "#7a6f60"} threshold={15} />
+    </mesh>
+  );
+}
+
+/** Identifiant de survol de la PAC, qui n'est pas une zone de la maison. */
+const PAC_HOVER_ID = "pac";
+
+/** Cadre lumineux autour de la PAC survolée : le modèle GLB garde ses propres matériaux. */
+function PacHighlight() {
+  const [w, h, d] = PAC_DIMENSIONS;
+  return (
+    <mesh position-y={h / 2 + 0.02} raycast={() => null}>
+      <boxGeometry args={[w + 0.12, h + 0.12, d + 0.12]} />
+      <meshBasicMaterial color="#ffffff" transparent opacity={0.12} depthWrite={false} />
+      <Edges color="#ffffff" />
     </mesh>
   );
 }

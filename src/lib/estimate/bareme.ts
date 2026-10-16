@@ -93,12 +93,4 @@ export const DEFAULT_BAREME: BaremeLigne[] = [
     mpr: { "tres-modeste": 5000, modeste: 4000, intermediaire: 3000, superieur: 0 },
     plafondUnites: 1,
   },
-  {
-    workId: "ballon-thermo",
-    unite: "unite",
-    prixUnitaire: 3500,
-    cee: 150,
-    mpr: { "tres-modeste": 1200, modeste: 800, intermediaire: 400, superieur: 0 },
-    plafondUnites: 1,
-  },
 ];
