@@ -5,6 +5,12 @@ Poste : [développeur full-stack](https://www.welcometothejungle.com/fr/companie
 
 Argile intègre une reconstruction 3D du logement et un simulateur d'aides intégrable au site des artisans. Cette démo relie les deux. On décrit une maison en quelques paramètres et on la voit en 3D. Un clic sur les zones à rénover suffit : **le métré et l'estimation des aides se recalculent à partir de la géométrie**.
 
+![Démo : on modifie la maison, on sélectionne les travaux, puis on tourne autour jusqu'à la PAC](docs/demo.webp)
+
+| Maison à étage, toit 4 pans | Version intégrable (`/embed`) |
+| --- | --- |
+| ![Maison à étage avec toit 4 pans, murs et fenêtres sélectionnés](docs/etage-4-pans.png) | ![Simulateur compact pour iframe](docs/embed.png) |
+
 ## Fonctionnalités
 
 - **Configurateur** : dimensions, niveaux, toiture 2 pans / 4 pans / plate, pente, combles perdus ou aménagés, plancher bas, mitoyenneté, fenêtres par façade. Les paramètres incohérents sont refusés avec un message, et la maquette garde alors le dernier état valide.
@@ -63,11 +69,21 @@ npm install
 npm run dev
 ```
 
-Aucune base à installer : PGlite crée `.pglite/`, applique les migrations et charge le barème au premier appel. En production, il faut définir `DATABASE_URL` (Neon), puis lancer :
+Pour régénérer les captures et l'animation du README, le serveur de dev doit tourner :
 
 ```bash
-npm run db:migrate
+npm run capture
 ```
+
+Aucune base à installer : PGlite crée `.pglite/`, applique les migrations et charge le barème au premier appel.
+
+## Déployer (Vercel + Neon)
+
+1. Importer le dépôt GitHub dans Vercel (Add New → Project). Le framework Next.js est détecté tout seul.
+2. Dans le projet Vercel, ouvrir Storage → Create Database → **Neon**. L'intégration crée la base et ajoute `DATABASE_URL` aux variables d'environnement.
+3. Redéployer. Le script `vercel-build` applique les migrations et charge le barème (`src/db/migrate.ts`), puis lance `next build`.
+
+Sans `DATABASE_URL`, l'app utilise PGlite. Ce mode convient au local, pas à Vercel, dont le système de fichiers est en lecture seule.
 
 ## Équipements 3D (Tripo3D → Blender → web)
 
@@ -111,5 +127,5 @@ Les fichiers bruts restent dans `assets/tripo/`, ignoré par git. Si le modèle 
 - [x] Vue 3D interactive et configurateur
 - [x] Projets enregistrés, page partageable, version `/embed`
 - [x] Modèle de PAC Tripo3D, optimisé pour le web
-- [ ] Captures d'écran et GIF
+- [x] Captures d'écran et animation (`npm run capture`)
 - [ ] Déploiement Vercel + Neon

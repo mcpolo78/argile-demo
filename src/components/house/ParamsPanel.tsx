@@ -89,12 +89,15 @@ export default function ParamsPanel({ params: p, errors, onChange }: Props) {
       </Section>
 
       <Section titre="Fenêtres par niveau">
-        <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-1">
           {FACADES.map((f) => {
             const mitoyen = (f === "est" && p.mitoyens >= 1) || (f === "ouest" && p.mitoyens >= 2);
             return (
               <div key={f} className="flex items-center justify-between rounded-md border border-border bg-background px-2 py-1">
-                <span className="text-sm capitalize">{f}</span>
+                <span className={`text-sm capitalize ${mitoyen ? "text-muted" : ""}`}>
+                  {f}
+                  {mitoyen && <span className="ml-1 text-xs normal-case">(mitoyen)</span>}
+                </span>
                 <div className="flex items-center gap-1">
                   <StepButton disabled={mitoyen || p.fenetresParNiveau[f] === 0} onClick={() => setFenetres(f, p.fenetresParNiveau[f] - 1)}>
                     −
