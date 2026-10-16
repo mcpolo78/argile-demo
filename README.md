@@ -83,7 +83,7 @@ Aucune base à installer : PGlite crée `.pglite/`, applique les migrations et c
 
 1. Importer le dépôt GitHub dans Vercel (Add New → Project). Le framework Next.js est détecté tout seul.
 2. Dans le projet Vercel, ouvrir Storage → Create Database → **Neon**. L'intégration crée la base et ajoute `DATABASE_URL` aux variables d'environnement.
-3. Redéployer. Le script `vercel-build` applique les migrations et charge le barème (`src/db/migrate.ts`), puis lance `next build`.
+3. Redéployer. Ensuite, chaque push sur `main` déploie en production, et chaque autre branche obtient une URL de preview. Le script `vercel-build` applique les migrations et charge le barème (`src/db/migrate.ts`), puis lance `next build`.
 
 Sur Vercel, l'app utilise Neon via `DATABASE_URL`. En local, elle reste sur PGlite même si `vercel env pull` a écrit `DATABASE_URL` dans `.env.local` : il faut `USE_NEON=1` pour viser Neon, ce qui évite de remplir la base de production avec des projets de test.
 
