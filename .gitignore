@@ -45,3 +45,6 @@ next-env.d.ts
 
 # modèles bruts générés par Tripo (les versions optimisées vont dans public/models)
 /assets/tripo
+
+.vercel
+.env*
