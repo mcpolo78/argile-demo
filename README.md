@@ -1,11 +1,9 @@
 # argile-demo — maquette 3D paramétrique
 
-Projet de démonstration pour une candidature chez **Argile** (SaaS pour les artisans RGE de la rénovation énergétique).
+Simulateur de rénovation énergétique pour les artisans RGE, intégrable sur leur site.
 **Démo en ligne : https://argile-demo.vercel.app** · version intégrable : https://argile-demo.vercel.app/embed
 
-Poste : [développeur full-stack](https://www.welcometothejungle.com/fr/companies/remi/jobs/eb8dcc21-ed78-4502-8cf0-3ea0d488e583), CDI, Paris.
-
-Argile intègre une reconstruction 3D du logement et un simulateur d'aides intégrable au site des artisans. Cette démo relie les deux. On décrit une maison en quelques paramètres et on la voit en 3D. Un clic sur les zones à rénover suffit : **le métré et l'estimation des aides se recalculent à partir de la géométrie**.
+Le projet relie deux briques qu'on trouve rarement ensemble : une maquette 3D du logement et un simulateur d'aides. On décrit une maison en quelques paramètres et on la voit en 3D. Un clic sur les zones à rénover suffit : **le métré et l'estimation des aides se recalculent à partir de la géométrie**.
 
 ![Démo : on modifie la maison, on sélectionne les travaux, puis on tourne autour jusqu'à la PAC](docs/demo.webp)
 
@@ -24,7 +22,7 @@ Argile intègre une reconstruction 3D du logement et un simulateur d'aides inté
 - **Estimation indicative** : coût, MaPrimeRénov' par tranche de revenus, primes CEE, plafonds par poste, écrêtement et reste à charge.
 - **Projets enregistrés** en Postgres, avec une URL partageable `/projets/[id]`. Le serveur revalide l'entrée et **recalcule** surfaces et estimation : on ne fait pas confiance au client.
 - **Export de l'estimation** : le bouton « Télécharger mon estimation » enregistre le projet et télécharge un **PDF d'une page** (vue 3D, logement, postes, aides, reste à charge, lien du projet), généré dans le navigateur avec jsPDF. Trois autres formats sont proposés ensuite : image PNG de la vue 3D, **JSON structuré** (format versionné `argile-demo/estimation@1`, prêt à importer dans un CRM) et lien du projet.
-- **PAC mise en scène** : cochée par défaut et posée sur un pignon. Quand on la recoche après avoir tourné la vue, la caméra pivote jusqu'à elle.
+- **PAC générée par IA** : le modèle 3D de l'unité extérieure a été produit avec la **CLI Tripo3D** (text-to-3D), puis remis à l'échelle et orienté par script dans Blender ([détail](#équipements-3d-tripo3d--blender--web)). Elle est cochée par défaut et posée sur un pignon. Quand on la recoche après avoir tourné la vue, la caméra pivote jusqu'à elle.
 - **Version intégrable** sur `/embed` (en-tête `frame-ancestors *`), avec le snippet iframe affiché sur la page d'accueil.
 
 ## Architecture

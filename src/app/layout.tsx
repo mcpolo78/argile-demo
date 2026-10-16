@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Maquette 3D paramétrique — démo Argile",
+  title: "Maquette 3D paramétrique — simulateur de rénovation",
   description: "Configurez une maison en 3D, sélectionnez les travaux et obtenez surfaces et estimation indicative des aides.",
 };
 
