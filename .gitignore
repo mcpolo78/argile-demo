@@ -42,3 +42,6 @@ next-env.d.ts
 
 # base locale PGlite
 /.pglite
+
+# modèles bruts générés par Tripo (les versions optimisées vont dans public/models)
+/assets/tripo

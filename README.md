@@ -71,18 +71,30 @@ npm run db:migrate
 
 ## Équipements 3D (Tripo3D → Blender → web)
 
-La PAC s'affiche aujourd'hui sous la forme d'un volume à ses dimensions réelles. Pour la remplacer par un vrai modèle :
+L'unité extérieure de PAC (`public/models/pac.glb`, 584 Ko) a été produite par une chaîne entièrement scriptée. Le modèle généré sert au rendu, jamais à la mesure.
 
-1. Générer une unité extérieure de PAC air-eau sur tripo3d.ai, en image-to-3D ou text-to-3D, puis l'exporter en GLB.
-2. Dans Blender (MCP ou à la main) :
-   - remettre le modèle à l'échelle, soit 1,0 × 0,8 × 0,4 m ;
-   - placer l'origine au sol, la face avant vers +Z ;
-   - le décimer, puis l'exporter en GLB.
-3. Compresser le fichier, puis renseigner `MODELS.pac` dans `src/lib/assets.ts` :
+1. **Génération** avec [Tripo CLI](https://www.npmjs.com/package/tripo-cli) : text-to-model v3.1 texturé PBR, puis réduction à 20 000 faces. Coût : 50 crédits API.
 
 ```bash
-npx @gltf-transform/cli optimize pac.glb public/models/pac.glb --compress meshopt --texture-compress webp
+tripo make "outdoor unit of an air-to-water heat pump, white metal casing, single large round fan grille on the front left, side service panel on the right, realistic residential appliance" --then decimate:20000 -p texture=true -p pbr=true -o assets/tripo/pac
 ```
+
+2. **Normalisation** dans Blender (`blender/normalize_asset.py`) :
+   - rotation pour mettre la grille vers l'avant (+Z en glTF) ;
+   - échelle uniforme pour obtenir 1,0 m de large, soit 1,00 × 0,67 × 0,49 m ;
+   - origine centrée au sol, puis rendus de contrôle sous 5 angles.
+
+```bash
+blender -b --factory-startup -P blender/normalize_asset.py -- assets/tripo/pac/tripo-out/<tâche>/model.glb assets/tripo/pac/norm/pac.glb --width 1.0 --rot-z -90 --views assets/tripo/pac/norm/views
+```
+
+3. **Compression** en meshopt avec des textures WebP 1024 px, ce qui fait passer le fichier de 3,1 Mo à 584 Ko :
+
+```bash
+npx @gltf-transform/cli optimize assets/tripo/pac/norm/pac.glb public/models/pac.glb --compress meshopt --texture-compress webp --texture-size 1024
+```
+
+Les fichiers bruts restent dans `assets/tripo/`, ignoré par git. Si le modèle ne se charge pas, la scène retombe sur un volume aux mêmes dimensions.
 
 ## Limites assumées
 
@@ -98,6 +110,6 @@ npx @gltf-transform/cli optimize pac.glb public/models/pac.glb --compress meshop
 - [x] Estimation et barème en base
 - [x] Vue 3D interactive et configurateur
 - [x] Projets enregistrés, page partageable, version `/embed`
-- [ ] Modèle de PAC Tripo3D, optimisé pour le web
+- [x] Modèle de PAC Tripo3D, optimisé pour le web
 - [ ] Captures d'écran et GIF
 - [ ] Déploiement Vercel + Neon
